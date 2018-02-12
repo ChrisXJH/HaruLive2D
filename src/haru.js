@@ -12,6 +12,14 @@ function Haru(config, canvas, animate) {
 
     this.completed = false;
 
+    this.origin_x = 0;
+
+    this.origin_y = 0;
+
+    this.distance = this.canvas.width;
+
+    this.armMode = 0;
+
     this.init();
     
 };
@@ -26,6 +34,7 @@ Haru.prototype.init = function() {
 
     _this.initModel(function() {
         _this.initTextures();
+        _this.initGLMatrix();
     });
 
 };
@@ -51,21 +60,17 @@ Haru.prototype.draw = function() {
     _this.gl.clearColor( 0.0 , 0.0 , 0.0 , 0.0 );
     _this.gl.clear(_this.gl.COLOR_BUFFER_BIT);
 
-    for( var i = 0; i < _this.loadedTextures.length; i++ ){
-            
-        var texName = _this.createTexture(_this.loadedTextures[i]);
+    if (_this.loadedTextures != null) {
+        for(var i = 0; i < _this.loadedTextures.length; i++ ){
+                
+            var texName = _this.createTexture(_this.loadedTextures[i]);
 
-        _this.live2DModel.setTexture(i, texName); 
+            _this.live2DModel.setTexture(i, texName); 
+        }
+        _this.loadedTextures = null;
     }
 
-    var s = 2.0 / _this.live2DModel.getCanvasWidth(); 
-    var matrix4x4 = [
-        s, 0, 0, 0,
-        0,-s, 0, 0,
-        0, 0, 1, 0,
-        -1, 1, 0, 1
-    ];
-    _this.live2DModel.setMatrix(matrix4x4);
+    
 
     // var t = UtSystem.getUserTimeMSec() * 0.001 * 2 * Math.PI; 
     // var cycle = 3.0;
@@ -77,6 +82,36 @@ Haru.prototype.draw = function() {
 
     _this.live2DModel.update(); 
     _this.live2DModel.draw();
+};
+
+Haru.prototype.enableLookAtMouse = function() {
+    var _this = this;
+    canvas.addEventListener('mousemove', function(e){
+        if (haru.completed) {
+            var x = e.clientX - _this.origin_x;
+            var y = e.clientY + _this.origin_y;
+            
+            var angle_x = Math.atan(x / _this.distance) * 180;
+            var angle_y = Math.atan(y / _this.distance) * 180;
+            _this.live2DModel.setParamFloat("PARAM_ANGLE_X", angle_x);
+            _this.live2DModel.setParamFloat("PARAM_ANGLE_Y", -angle_y);
+        }
+    });
+};
+
+Haru.prototype.setArmMode = function(mode) {
+    var _this = this;
+    if (mode == 0) {
+        _this.live2DModel.setPartsOpacity("PARTS_01_ARM_L_A_001", 1);
+        _this.live2DModel.setPartsOpacity("PARTS_01_ARM_R_A_001", 1);
+        _this.live2DModel.setPartsOpacity("PARTS_01_ARM_L_B_001", 0);
+        _this.live2DModel.setPartsOpacity("PARTS_01_ARM_R_B_001", 0);
+    } else {
+        _this.live2DModel.setPartsOpacity("PARTS_01_ARM_L_B_001", 1);
+        _this.live2DModel.setPartsOpacity("PARTS_01_ARM_R_B_001", 1);
+        _this.live2DModel.setPartsOpacity("PARTS_01_ARM_L_A_001", 0);
+        _this.live2DModel.setPartsOpacity("PARTS_01_ARM_R_A_001", 0);
+    }
 };
 
 Haru.prototype.initModel = function(callback) {
@@ -113,6 +148,31 @@ Haru.prototype.initTextures = function() {
         console.error("Missing texture configuration.");
     }
 };
+
+Haru.prototype.loadTextures = function() {
+    var _this = this;
+    for(var i = 0; i < _this.loadedTextures.length; i++ ){
+                
+        var texName = _this.createTexture(_this.loadedTextures[i]);
+
+        _this.live2DModel.setTexture(i, texName); 
+    }
+};
+
+Haru.prototype.initGLMatrix = function() {
+    var _this = this;
+    var s = 2.0 / _this.live2DModel.getCanvasWidth();
+    _this.origin_x = _this.canvas.width / 2;
+    _this.origin_y = (-_this.canvas.height + 160) / 2;
+
+    var matrix4x4 = [
+        s, 0, 0, 0,
+        0,-s, 0, 0,
+        0, 0, 1, 0,
+        -1, 1, 0, 1
+    ];
+    _this.live2DModel.setMatrix(matrix4x4);
+}
 
 
 // Helper functions

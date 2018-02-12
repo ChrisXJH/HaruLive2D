@@ -7,24 +7,27 @@ var haruConfig = {
     ]
 };
 
-var conf_2 = {
-    "model":"assets/Epsilon2.1/Epsilon2.1.moc",
-    "textures":[
-        "assets/Epsilon2.1/Epsilon2.1.2048/texture_00.png",
-    ]
-};
-
-
-
-
 
 var canvas = document.getElementById("haru");
 
 var haru = new Haru(haruConfig, canvas);
 
+haru.enableLookAtMouse();
+
 (function animate() {
-    if (haru.isCompleted()) {
+    if (haru.completed) {
+        haru.setArmMode(1);
         haru.draw();
     }
+
+    var requestAnimationFrame = 
+        window.requestAnimationFrame || 
+        window.mozRequestAnimationFrame ||
+        window.webkitRequestAnimationFrame || 
+        window.msRequestAnimationFrame;
+
+                
     requestAnimationFrame(animate);
+    // requestAnimationFrame(animate);
 })();
+
