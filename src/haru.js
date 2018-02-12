@@ -1,4 +1,4 @@
-function Haru(config, canvas, animate) {
+function Haru(config, canvas, callback) {
 
     this.config = config;
     
@@ -20,11 +20,27 @@ function Haru(config, canvas, animate) {
 
     this.armMode = 0;
 
-    this.init();
+    this.currentMotion = {
+        motion : null,
+        repeat: false
+    };
+
+
+    this.MOUSE_TIME_OUT = 5000;
+
+    this.mouseTimeout = null;
+
+    this.mouse_x = 0;
+
+    this.mouse_y = 0;
+
+    this.mouseOut = true;
+
+    this.init(callback);
     
 };
 
-Haru.prototype.init = function() {
+Haru.prototype.init = function(callback) {
 
     var _this = this;
 
@@ -33,8 +49,13 @@ Haru.prototype.init = function() {
     _this.initWebGL();
 
     _this.initModel(function() {
-        _this.initTextures();
-        _this.initGLMatrix();
+        
+        _this.initTextures(function() {
+            _this.initGLMatrix();
+            
+            if (callback != null)
+                callback(_this);
+        });
     });
 
 };
@@ -53,6 +74,11 @@ Haru.prototype.initWebGL = function() {
 
 Haru.prototype.isCompleted = function() {
     return this.completed;
+};
+
+Haru.prototype.update = function(seconds) {
+    this.updateMotion();
+    this.updateMouth();
 };
 
 Haru.prototype.draw = function() {
@@ -74,19 +100,66 @@ Haru.prototype.draw = function() {
     _this.live2DModel.draw();
 };
 
+Haru.prototype.updateMotion = function() {
+    if (this.currentMotion != null && this.currentMotion.motion != null) {
+        var _this = this;
+        var step = _this.currentMotion.motion.next();
+        
+        if (step == null && this.currentMotion.repeat)
+            this.currentMotion.motion.reset();
+
+        for (var key in step) {
+            if (key == "PARAM_ANGLE_X" || key == "PARAM_ANGLE_Y") {
+                if (!_this.mouseOut)
+                    continue;
+            }
+            _this.setParam(key, step[key]);
+        }
+    }
+};
+
+Haru.prototype.updateMouth = function() {
+    // TODO: will be used in singing feature
+};
+
 Haru.prototype.enableLookAtMouse = function() {
     var _this = this;
-    canvas.addEventListener('mousemove', function(e){
-        if (haru.completed) {
-            var x = e.clientX - _this.origin_x;
-            var y = e.clientY + _this.origin_y;
-            
-            var angle_x = Math.atan(x / _this.distance) * 180;
-            var angle_y = Math.atan(y / _this.distance) * 180;
-            _this.live2DModel.setParamFloat("PARAM_ANGLE_X", angle_x);
-            _this.live2DModel.setParamFloat("PARAM_ANGLE_Y", -angle_y);
-        }
+
+    _this.canvas.addEventListener('mousemove', function(e){
+        clearTimeout(_this.mouseTimeout);
+        _this.mouse_x = e.clientX - _this.origin_x;
+        _this.mouse_y = e.clientY + _this.origin_y;
+        _this.mouseOut = false;
+        
+        _this.updateFaceDirection();
+
+        _this.mouseTimeout = setTimeout(function() {
+            _this.resetMouse();
+            clearTimeout(_this.mouseTimeout);
+        }, _this.MOUSE_TIME_OUT);
     });
+
+    _this.canvas.addEventListener('mouseout', function(e) {
+        _this.resetMouse();
+
+        _this.updateFaceDirection();
+    });
+};
+
+Haru.prototype.resetMouse = function() {
+    this.mouse_x = 0;
+    this.mouse_y = 0;
+    this.mouseOut = true;
+};
+
+Haru.prototype.updateFaceDirection = function() {
+    var _this = this;
+    if (haru.completed) {
+        var angle_x = Math.atan(_this.mouse_x / _this.distance) * 180;
+        var angle_y = Math.atan(_this.mouse_y / _this.distance) * 180;
+        _this.live2DModel.setParamFloat("PARAM_ANGLE_X", angle_x);
+        _this.live2DModel.setParamFloat("PARAM_ANGLE_Y", -angle_y);
+    }
 };
 
 Haru.prototype.setArmMode = function(mode) {
@@ -104,7 +177,15 @@ Haru.prototype.setArmMode = function(mode) {
     }
 };
 
+Haru.prototype.setMotion = function(motion, repeat) {
+    this.currentMotion = {
+        motion : motion,
+        repeat : repeat
+    };
+};
+
 Haru.prototype.initModel = function(callback) {
+    
     if (this.config != null && this.config.model != null) {
         var _this = this;
         loadBytes(this.config.model, function(response) {
@@ -118,16 +199,20 @@ Haru.prototype.initModel = function(callback) {
     }
 };
 
-Haru.prototype.initTextures = function() {
+Haru.prototype.initTextures = function(callback) {
     if(this.config.textures != null) {
         var _this = this;
         var loadCount = 0;
         for (var i = 0; i < _this.config.textures.length; i++) {
             _this.loadedTextures[i] = new Image();
             _this.loadedTextures[i].src = _this.config.textures[i];
-            _this.loadedTextures[i].onload = function() {
-                if (++loadCount == _this.config.textures.length)
+            _this.loadedTextures[i].onload = function(e) {
+                if (++loadCount == _this.config.textures.length) {
+                    
                     _this.completed = true;
+                    if (callback != null)
+                        callback(_this);
+                }
             };
             _this.loadedTextures[i].onerror = function() {
                 console.error("Failed to load image : " + _this.config.textures[i]);
@@ -165,6 +250,35 @@ Haru.prototype.initGLMatrix = function() {
 }
 
 
+Haru.prototype.setParam = function(name, val) {
+    this.live2DModel.setParamFloat(name, val);
+};
+
+Haru.prototype.createTexture = function(image) {
+
+    var gl = this.gl;
+    var texture = gl.createTexture(); 
+    if ( !texture ){
+        console.error("Failed to generate gl texture name.");
+        return -1;
+    }
+    
+    if(this.live2DModel.isPremultipliedAlpha() == false){
+        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1);
+    }
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);	
+    gl.activeTexture( gl.TEXTURE0 );
+    gl.bindTexture( gl.TEXTURE_2D , texture );
+    gl.texImage2D( gl.TEXTURE_2D , 0 , gl.RGBA , gl.RGBA , gl.UNSIGNED_BYTE , image);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
+    gl.generateMipmap(gl.TEXTURE_2D);
+    gl.bindTexture( gl.TEXTURE_2D , null );
+
+    return texture;
+};
+
+
 // Helper functions
 
 function getWebGLContext(canvas) {
@@ -175,7 +289,7 @@ function getWebGLContext(canvas) {
         premultipliedAlpha : true
     };
 
-    for( var i = 0; i < NAMES.length; i++ ){
+    for (var i = 0; i < NAMES.length; i++ ){
         try{
             var ctx = canvas.getContext( NAMES[i], param );
             if( ctx ) return ctx;
@@ -203,27 +317,3 @@ function loadBytes(path, callback) {
 
     request.send(null);
 }
-
-Haru.prototype.createTexture = function(image) {
-
-    var gl = this.gl;
-    var texture = gl.createTexture(); 
-    if ( !texture ){
-        console.error("Failed to generate gl texture name.");
-        return -1;
-    }
-    
-    if(this.live2DModel.isPremultipliedAlpha() == false){
-        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1);
-    }
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);	
-    gl.activeTexture( gl.TEXTURE0 );
-    gl.bindTexture( gl.TEXTURE_2D , texture );
-    gl.texImage2D( gl.TEXTURE_2D , 0 , gl.RGBA , gl.RGBA , gl.UNSIGNED_BYTE , image);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
-    gl.generateMipmap(gl.TEXTURE_2D);
-    gl.bindTexture( gl.TEXTURE_2D , null );
-
-    return texture;
-};

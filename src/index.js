@@ -7,16 +7,49 @@ var haruConfig = {
     ]
 };
 
+var motions = [
+    {
+        "id" : "",
+        "path" : "assets/haru/motions/idle_01.json"
+    },
+    {
+        "id" : "",
+        "path" : "assets/haru/motions/idle_02.json"
+    }
+];
 
 var canvas = document.getElementById("haru");
 
-var haru = new Haru(haruConfig, canvas);
+var haru = null;
 
-haru.enableLookAtMouse();
+function initHaru() {
+    
+    haru = new Haru(haruConfig, canvas, function() {
+        haru.enableLookAtMouse();
+        haru.setMotion(motionMgr.next(), true);
 
-(function animate() {
-    if (haru.completed) {
+        canvas.addEventListener('click', function() {
+            haru.setMotion(motionMgr.next(), true);
+        });
+        animate();
+    });
+}
+
+
+
+
+
+
+var motionMgr = new MotionManager(motions, initHaru);
+
+
+
+
+function animate(seconds) {
+    
+    if (haru != null && haru.completed) {
         haru.setArmMode(1);
+        haru.update(seconds);
         haru.draw();
     }
 
@@ -26,8 +59,7 @@ haru.enableLookAtMouse();
         window.webkitRequestAnimationFrame || 
         window.msRequestAnimationFrame;
 
-                
     requestAnimationFrame(animate);
-    // requestAnimationFrame(animate);
-})();
+
+}
 
