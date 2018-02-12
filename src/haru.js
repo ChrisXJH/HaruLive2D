@@ -70,16 +70,6 @@ Haru.prototype.draw = function() {
         _this.loadedTextures = null;
     }
 
-    
-
-    // var t = UtSystem.getUserTimeMSec() * 0.001 * 2 * Math.PI; 
-    // var cycle = 3.0;
-    
-    // _this.live2DModel.setParamFloat("PARAM_ANGLE_Y", 30 * Math.sin(t/cycle));
-    // _this.live2DModel.setParamFloat("PARAM_EYE_R_OPEN", 1 * Math.sin(t/cycle));
-    // _this.live2DModel.setParamFloat("PARAM_EYE_L_OPEN", 1 * Math.sin(t/cycle));
-    
-
     _this.live2DModel.update(); 
     _this.live2DModel.draw();
 };
