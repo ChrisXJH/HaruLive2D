@@ -36,6 +36,8 @@ function Haru(config, canvas, callback) {
 
     this.mouseOut = true;
 
+    this.waveMax = 0;
+
     this.init(callback);
     
 };
@@ -78,7 +80,6 @@ Haru.prototype.isCompleted = function() {
 
 Haru.prototype.update = function(seconds) {
     this.updateMotion();
-    this.updateMouth();
 };
 
 Haru.prototype.draw = function() {
@@ -118,7 +119,10 @@ Haru.prototype.updateMotion = function() {
     }
 };
 
-Haru.prototype.updateMouth = function() {
+Haru.prototype.updateMouth = function(mag) {
+    if (mag == null) return;
+
+    this.setParam('PARAM_MOUTH_OPEN_Y', mag);
     // TODO: will be used in singing feature
 };
 
@@ -276,6 +280,17 @@ Haru.prototype.createTexture = function(image) {
     gl.bindTexture( gl.TEXTURE_2D , null );
 
     return texture;
+};
+
+Haru.prototype.subscribe = function(subject) {
+    if (subject != null) subject.addListener(this);
+};
+
+Haru.prototype.notify = function(whoFrom) {
+    var waveInfo = whoFrom.getWaveInfo(200);
+    
+    this.updateMouth(waveInfo / 120);
+    
 };
 
 

@@ -10,6 +10,10 @@ var haruConfig = {
 var motions = [
     {
         "id" : "",
+        "path" : "assets/haru/motions/idle_00.json"
+    },
+    {
+        "id" : "",
         "path" : "assets/haru/motions/idle_01.json"
     },
     {
@@ -20,16 +24,27 @@ var motions = [
 
 var canvas = document.getElementById("haru");
 
+var audio = document.getElementById("audio");
+
 var haru = null;
+
+var musicPlayer = new MusicPlayer(audio);
+
+var playing = false;
 
 function initHaru() {
     
     haru = new Haru(haruConfig, canvas, function() {
+        haru.subscribe(musicPlayer);
         haru.enableLookAtMouse();
         haru.setMotion(motionMgr.next(), true);
 
         canvas.addEventListener('click', function() {
             haru.setMotion(motionMgr.next(), true);
+            if (playing == false) {
+                audio.play();
+                playing = true;
+            }
         });
         animate();
     });
@@ -48,7 +63,7 @@ var motionMgr = new MotionManager(motions, initHaru);
 function animate(seconds) {
     
     if (haru != null && haru.completed) {
-        haru.setArmMode(1);
+        haru.setArmMode(0);
         haru.update(seconds);
         haru.draw();
     }
