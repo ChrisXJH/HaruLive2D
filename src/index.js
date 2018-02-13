@@ -10,11 +10,11 @@ var haruConfig = {
 var motions = [
     {
         "id" : "",
-        "path" : "assets/haru/motions/idle_00.json"
+        "path" : "assets/haru/motions/idle_01.json"
     },
     {
         "id" : "",
-        "path" : "assets/haru/motions/idle_01.json"
+        "path" : "assets/haru/motions/idle_00.json"
     },
     {
         "id" : "",
@@ -30,8 +30,6 @@ var haru = null;
 
 var musicPlayer = new MusicPlayer(audio);
 
-var playing = false;
-
 function initHaru() {
     
     haru = new Haru(haruConfig, canvas, function() {
@@ -41,9 +39,8 @@ function initHaru() {
 
         canvas.addEventListener('click', function() {
             haru.setMotion(motionMgr.next(), true);
-            if (playing == false) {
-                audio.play();
-                playing = true;
+            if (!musicPlayer.isPlaying()) {
+                musicPlayer.play();
             }
         });
         animate();

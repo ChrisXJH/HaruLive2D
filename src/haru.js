@@ -38,6 +38,10 @@ function Haru(config, canvas, callback) {
 
     this.waveMax = 0;
 
+    this.lipValues = [];
+
+    this.lipValDivisor = 100;
+
     this.init(callback);
     
 };
@@ -63,7 +67,7 @@ Haru.prototype.init = function(callback) {
 };
 
 Haru.prototype.initWebGL = function() {
-    var gl = getWebGLContext(this.canvas);
+    var gl = Utils.getWebGLContext(this.canvas);
     if (!gl) {
         console.error("Failed to create WebGL context.");
         return;
@@ -183,8 +187,8 @@ Haru.prototype.setArmMode = function(mode) {
 
 Haru.prototype.setMotion = function(motion, repeat) {
     this.currentMotion = {
-        motion : motion,
-        repeat : repeat
+        motion: motion,
+        repeat: repeat
     };
 };
 
@@ -192,7 +196,7 @@ Haru.prototype.initModel = function(callback) {
     
     if (this.config != null && this.config.model != null) {
         var _this = this;
-        loadBytes(this.config.model, function(response) {
+        Utils.loadBytes(this.config.model, function(response) {      
             _this.live2DModel = Live2DModelWebGL.loadModel(response);
             if (callback != null)
                 callback();
@@ -287,48 +291,32 @@ Haru.prototype.subscribe = function(subject) {
 };
 
 Haru.prototype.notify = function(whoFrom) {
-    var waveInfo = whoFrom.getWaveInfo(200);
-    
-    this.updateMouth(waveInfo / 120);
-    
-};
+    var _this = this;
+    var dataArray = whoFrom.getWaveInfo();
+    var avg = (dataArray[9] + dataArray[10] + dataArray[11]) / 3;
+    this.lipValues.push(avg);
+    var lipValue = avg;
 
-
-// Helper functions
-
-function getWebGLContext(canvas) {
-    var NAMES = [ "webgl" , "experimental-webgl" , "webkit-3d" , "moz-webgl"];
-
-    var param = {
-        alpha : true,
-        premultipliedAlpha : true
-    };
-
-    for (var i = 0; i < NAMES.length; i++ ){
-        try{
-            var ctx = canvas.getContext( NAMES[i], param );
-            if( ctx ) return ctx;
+    if (this.lipValues.length >= 3) {
+        lipValue = 0;
+        this.lipValues = this.lipValues.slice(1);
+       
+        for (var i = 0; i < this.lipValues.length; i++) {
+            lipValue += _this.lipValues[i];
         }
-        catch(e){}
-    }
-    return null;
-};
-
-function loadBytes(path, callback) {
-    var request = new XMLHttpRequest();
-    request.open("GET", path , true);
-    request.responseType = "arraybuffer";
-    request.onload = function(){
-        switch( request.status ){
-        case 200:
-            if (callback != null)
-                callback( request.response );
-            break;
-        default:
-            console.error( "Failed to load (" + request.status + ") : " + path );
-            break;
-        }
+        lipValue /= this.lipValues.length;
+        
     }
 
-    request.send(null);
-}
+    if (lipValue > this.lipValDivisor + 20) {
+        this.lipValDivisor -= 30;
+    }
+    else if (lipValue > this.lipValDivisor - 20) {
+        this.lipValDivisor += 30;
+    }
+
+    var mouseMag = this.lipValDivisor > 0 ? lipValue / this.lipValDivisor : 0;
+    
+    this.updateMouth(mouseMag);
+
+};

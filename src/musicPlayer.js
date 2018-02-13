@@ -1,8 +1,8 @@
-function MusicPlayer(htmlSource) {
+function MusicPlayer(audio) {
 
     this.listeners = [];
 
-    this.htmlSource = htmlSource;
+    this.audio = audio;
 
     this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -10,11 +10,16 @@ function MusicPlayer(htmlSource) {
 
     this.oscillator = this.audioCtx.createOscillator();
 
-    this.source = this.audioCtx.createMediaElementSource(this.htmlSource);
+    this.source = this.audioCtx.createMediaElementSource(this.audio);
 
-    this.NOTIFY_INTERVAL = 50;
+    this.NOTIFY_INTERVAL = 10;
+
+    this.playing = false;
+
     
     this.initStream();
+
+    this.initEventListeners();
 
     this.startNotify();
 
@@ -26,6 +31,24 @@ MusicPlayer.prototype.initStream = function() {
 
     this.analyser.connect(this.audioCtx.destination);
 
+    this.analyser.fftSize = 32;
+
+};
+
+MusicPlayer.prototype.initEventListeners = function() {
+    var _this = this;
+
+    this.audio.addEventListener('play', function() {
+        _this.playing = true;
+    });
+
+    this.audio.addEventListener('pause', function() {
+        _this.playing = false;
+    });
+
+    this.audio.addEventListener('ended', function() {
+        _this.playing = false;
+    });
 };
 
 MusicPlayer.prototype.startNotify = function() {
@@ -49,10 +72,18 @@ MusicPlayer.prototype.addListener = function(listener) {
     
 };
 
-MusicPlayer.prototype.load = function(url) {
-
+MusicPlayer.prototype.play = function() {
+    this.audio.play();
 };
 
-MusicPlayer.prototype.play = function() {
+MusicPlayer.prototype.pause = function() {
+    this.audio.pause();
+};
 
+MusicPlayer.prototype.isPlaying = function() {
+    return this.playing;
+};
+
+MusicPlayer.prototype.getAnalyser = function() {
+    return this.analyser;
 };
