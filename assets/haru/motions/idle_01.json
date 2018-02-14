@@ -1,5 +1,8 @@
 {
     "fps" : 30,
+
+    "id": "sing",
+    
     "params" : {
         
         "PARAM_BROW_L_ANGLE" : [0],

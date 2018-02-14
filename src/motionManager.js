@@ -54,7 +54,11 @@ MotionManager.prototype.getMotion = function(index) {
 };
 
 MotionManager.prototype.getMotionById = function(id) {
-    // TODO
+    var _this = this;
+    for (var i = 0; i < _this.motionStack.length; i++) {
+        if (_this.motionStack[i].id == id)
+            return _this.getMotion(i);
+    }
 };
 
 MotionManager.prototype.isReady = function() {

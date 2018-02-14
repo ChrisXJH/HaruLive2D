@@ -43,7 +43,9 @@ function Haru(config, canvas, callback) {
     this.lipValDivisor = 100;
 
     this.init(callback);
-    
+
+    var _this = this;
+
 };
 
 Haru.prototype.init = function(callback) {
@@ -244,7 +246,8 @@ Haru.prototype.loadTextures = function() {
 
 Haru.prototype.initGLMatrix = function() {
     var _this = this;
-    var s = 2.0 / _this.live2DModel.getCanvasWidth();
+    var multi = 2;
+    var s = multi / _this.live2DModel.getCanvasWidth();
     _this.origin_x = _this.canvas.width / 2;
     _this.origin_y = (-_this.canvas.height + 160) / 2;
 
@@ -252,7 +255,7 @@ Haru.prototype.initGLMatrix = function() {
         s, 0, 0, 0,
         0,-s, 0, 0,
         0, 0, 1, 0,
-        -1, 1, 0, 1
+        -(multi/2), multi/2, 0, 1
     ];
     _this.live2DModel.setMatrix(matrix4x4);
 }
@@ -297,7 +300,7 @@ Haru.prototype.notify = function(whoFrom) {
     this.lipValues.push(avg);
     var lipValue = avg;
 
-    if (this.lipValues.length >= 3) {
+    if (this.lipValues.length >= 2) {
         lipValue = 0;
         this.lipValues = this.lipValues.slice(1);
        
@@ -309,10 +312,10 @@ Haru.prototype.notify = function(whoFrom) {
     }
 
     if (lipValue > this.lipValDivisor + 20) {
-        this.lipValDivisor -= 30;
+        this.lipValDivisor -= 5;
     }
     else if (lipValue > this.lipValDivisor - 20) {
-        this.lipValDivisor += 30;
+        this.lipValDivisor += 5;
     }
 
     var mouseMag = this.lipValDivisor > 0 ? lipValue / this.lipValDivisor : 0;

@@ -1,7 +1,6 @@
 .DS_Store
 *.mtn
 expressions
-sounds
 *.model.json
 *.physics.json
 *.pose.json

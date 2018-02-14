@@ -9,26 +9,34 @@ var haruConfig = {
 
 var motions = [
     {
-        "id" : "",
+        "id" : "sing",
         "path" : "assets/haru/motions/idle_01.json"
     },
     {
-        "id" : "",
+        "id" : "smile",
         "path" : "assets/haru/motions/idle_00.json"
     },
     {
-        "id" : "",
+        "id" : "unknown",
         "path" : "assets/haru/motions/idle_02.json"
     }
 ];
 
 var canvas = document.getElementById("haru");
 
-var audio = document.getElementById("audio");
+var vocalAudio = document.getElementById("vocal");
+
+var song = document.getElementById("song");
 
 var haru = null;
 
-var musicPlayer = new MusicPlayer(audio);
+var musicPlayer = new MusicPlayer();
+
+musicPlayer.setVocal(vocalAudio);
+
+musicPlayer.setSong(song);
+
+musicPlayer.init();
 
 function initHaru() {
     
@@ -38,7 +46,7 @@ function initHaru() {
         haru.setMotion(motionMgr.next(), true);
 
         canvas.addEventListener('click', function() {
-            haru.setMotion(motionMgr.next(), true);
+            haru.setMotion(motionMgr.getMotionById('sing'), true);
             if (!musicPlayer.isPlaying()) {
                 musicPlayer.play();
             }

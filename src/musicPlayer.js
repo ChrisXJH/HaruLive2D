@@ -1,8 +1,10 @@
-function MusicPlayer(audio) {
+function MusicPlayer() {
 
     this.listeners = [];
 
-    this.audio = audio;
+    this.vocalAudio = null;
+
+    this.songAudio = null;
 
     this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -10,26 +12,41 @@ function MusicPlayer(audio) {
 
     this.oscillator = this.audioCtx.createOscillator();
 
-    this.source = this.audioCtx.createMediaElementSource(this.audio);
+    this.vocalSource = null;
 
     this.NOTIFY_INTERVAL = 10;
 
     this.playing = false;
 
-    
+}
+
+MusicPlayer.prototype.setVocal = function(vocal) {
+    this.vocalAudio = vocal;
+};
+
+MusicPlayer.prototype.setSong = function(song) {
+    this.songAudio = song;
+};
+
+MusicPlayer.prototype.init = function() {
+
+    this.vocalSource = this.audioCtx.createMediaElementSource(this.vocalAudio);
+
+    this.playing = false;
+
     this.initStream();
 
     this.initEventListeners();
 
     this.startNotify();
 
-}
+};
 
 MusicPlayer.prototype.initStream = function() {
 
-    this.source.connect(this.analyser);
+    this.vocalSource.connect(this.analyser);
 
-    this.analyser.connect(this.audioCtx.destination);
+    // this.analyser.connect(this.audioCtx.destination);
 
     this.analyser.fftSize = 32;
 
@@ -38,15 +55,15 @@ MusicPlayer.prototype.initStream = function() {
 MusicPlayer.prototype.initEventListeners = function() {
     var _this = this;
 
-    this.audio.addEventListener('play', function() {
+    this.songAudio.addEventListener('play', function() {
         _this.playing = true;
     });
 
-    this.audio.addEventListener('pause', function() {
+    this.songAudio.addEventListener('pause', function() {
         _this.playing = false;
     });
 
-    this.audio.addEventListener('ended', function() {
+    this.songAudio.addEventListener('ended', function() {
         _this.playing = false;
     });
 };
@@ -73,11 +90,13 @@ MusicPlayer.prototype.addListener = function(listener) {
 };
 
 MusicPlayer.prototype.play = function() {
-    this.audio.play();
+    this.vocalAudio.play();
+    this.songAudio.play();
 };
 
 MusicPlayer.prototype.pause = function() {
-    this.audio.pause();
+    this.vocalAudio.pause();
+    this.songAudio.pause();
 };
 
 MusicPlayer.prototype.isPlaying = function() {
