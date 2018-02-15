@@ -19,10 +19,6 @@ var motions = [
     {
         "id" : "unknown",
         "path" : "assets/haru/motions/idle_02.json"
-    },
-    {
-        "id" : "smile2",
-        "path" : "assets/haru/motions/idle_04.json"
     }
 ];
 
