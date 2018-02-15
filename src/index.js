@@ -57,6 +57,7 @@ window.onload = function() {
                     haru.setArmMode(0);
                     musicPlayer.play(function () {
                         haru.setMotion(motionMgr.getMotionById('smile'), true);
+                        haru.setArmMode(1);
                     });
                 }
                 else {
