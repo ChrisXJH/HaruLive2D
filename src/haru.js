@@ -313,7 +313,7 @@ Haru.prototype.notify = function(whoFrom) {
     this.lipValues.push(avg);
     var lipValue = avg;
 
-    if (this.lipValues.length >= 2) {
+    if (this.lipValues.length >= 3) {
         lipValue = 0;
         this.lipValues = this.lipValues.slice(1);
        
