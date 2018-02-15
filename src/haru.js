@@ -4,6 +4,8 @@ function Haru(config, canvas, callback) {
 
     this.live2DModel = null;
 
+    this.modelMode = config.modelMode != null ? config.modelMode : 1;
+
     this.canvas = canvas;
 
     this.gl = null;
@@ -188,15 +190,15 @@ Haru.prototype.updateFaceDirection = function() {
 Haru.prototype.setArmMode = function(mode) {
     var _this = this;
     if (mode == 0) {
-        _this.live2DModel.setPartsOpacity("PARTS_01_ARM_L_A_001", 1);
-        _this.live2DModel.setPartsOpacity("PARTS_01_ARM_R_A_001", 1);
-        _this.live2DModel.setPartsOpacity("PARTS_01_ARM_L_B_001", 0);
-        _this.live2DModel.setPartsOpacity("PARTS_01_ARM_R_B_001", 0);
+        _this.live2DModel.setPartsOpacity("PARTS_01_ARM_L_A_00" + _this.modelMode, 1);
+        _this.live2DModel.setPartsOpacity("PARTS_01_ARM_R_A_00" + _this.modelMode, 1);
+        _this.live2DModel.setPartsOpacity("PARTS_01_ARM_L_B_00" + _this.modelMode, 0);
+        _this.live2DModel.setPartsOpacity("PARTS_01_ARM_R_B_00" + _this.modelMode, 0);
     } else {
-        _this.live2DModel.setPartsOpacity("PARTS_01_ARM_L_B_001", 1);
-        _this.live2DModel.setPartsOpacity("PARTS_01_ARM_R_B_001", 1);
-        _this.live2DModel.setPartsOpacity("PARTS_01_ARM_L_A_001", 0);
-        _this.live2DModel.setPartsOpacity("PARTS_01_ARM_R_A_001", 0);
+        _this.live2DModel.setPartsOpacity("PARTS_01_ARM_L_B_00" + _this.modelMode, 1);
+        _this.live2DModel.setPartsOpacity("PARTS_01_ARM_R_B_00" + _this.modelMode, 1);
+        _this.live2DModel.setPartsOpacity("PARTS_01_ARM_L_A_00" + _this.modelMode, 0);
+        _this.live2DModel.setPartsOpacity("PARTS_01_ARM_R_A_00" + _this.modelMode, 0);
     }
 };
 
@@ -259,16 +261,19 @@ Haru.prototype.loadTextures = function() {
 
 Haru.prototype.initGLMatrix = function() {
     var _this = this;
-    var multi = 2;
-    var s = multi / _this.live2DModel.getCanvasWidth();
+    var scale = 1.5;
+    var ratio = _this.canvas.height / _this.canvas.width;
+
+    var s = scale / _this.live2DModel.getCanvasWidth();
+
     _this.origin_x = _this.canvas.width / 2;
     _this.origin_y = (-_this.canvas.height + 160) / 2;
 
     var matrix4x4 = [
-        s, 0, 0, 0,
+        s * ratio, 0, 0, 0,
         0,-s, 0, 0,
         0, 0, 1, 0,
-        -(multi/2), multi/2, 0, 1
+        -0.5, 1, 0, 1
     ];
     _this.live2DModel.setMatrix(matrix4x4);
 }
