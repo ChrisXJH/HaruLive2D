@@ -27,7 +27,9 @@ window.onload = function() {
 
     var canvas = document.getElementById("haru");
 
-    canvas.height = window.innerHeight;
+
+
+
 
     var vocalAudio = document.getElementById("vocal");
 
@@ -67,6 +69,19 @@ window.onload = function() {
             animate();
         });
     }
+
+    var RATIO = canvas.height / canvas.width;
+    function resize() {
+        canvas.height = window.innerHeight;
+        canvas.width = canvas.height / RATIO;
+        if (haru != null) haru.resize();
+    }
+
+    window.addEventListener('resize', function () {
+        resize();
+    });
+
+    resize();
 
     var motionMgr = new MotionManager(motions, initHaru);
 

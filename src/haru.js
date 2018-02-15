@@ -18,8 +18,6 @@ function Haru(config, canvas, callback) {
 
     this.origin_y = 0;
 
-    this.distance = this.canvas.width;
-
     this.armMode = 0;
 
     this.currentMotion = {
@@ -43,6 +41,8 @@ function Haru(config, canvas, callback) {
     this.lipValues = [];
 
     this.lipValDivisor = 100;
+
+    this.canvasOriginalHeight = this.canvas.height;
 
     this.init(callback);
 
@@ -173,7 +173,7 @@ Haru.prototype.updateFaceDirection = function() {
         var midHeight = _this.canvas.height / 2;
 
         var dragX = (_this.mouse_x - midWidth) / midWidth;
-        var dragY = (_this.mouse_y - midHeight + 100) / midHeight;
+        var dragY = (_this.mouse_y - midHeight + _this.canvas.height / 5) / midHeight;
 
         // var angle_x = Math.atan(_this.mouse_x / _this.distance) * 180;
         // var angle_y = Math.atan(_this.mouse_y / _this.distance) * 180;
@@ -261,7 +261,10 @@ Haru.prototype.loadTextures = function() {
 
 Haru.prototype.initGLMatrix = function() {
     var _this = this;
-    var scale = 1.5;
+    var heightToOriginalHeight = _this.canvas.height / _this.canvasOriginalHeight;
+    var y_offset = _this.canvas.height - _this.canvasOriginalHeight;
+
+    var scale = 1.5 * heightToOriginalHeight;
     var ratio = _this.canvas.height / _this.canvas.width;
 
     var s = scale / _this.live2DModel.getCanvasWidth();
@@ -271,10 +274,11 @@ Haru.prototype.initGLMatrix = function() {
 
     var matrix4x4 = [
         s * ratio, 0, 0, 0,
-        0,-s, 0, 0,
+        0, -s, 0, 0,
         0, 0, 1, 0,
-        -0.5, 1, 0, 1
+        -1, 1 * heightToOriginalHeight, 0, 1
     ];
+
     _this.live2DModel.setMatrix(matrix4x4);
 }
 
@@ -340,4 +344,8 @@ Haru.prototype.notify = function(whoFrom) {
 
     this.updateMouth(mouseMag);
 
+};
+
+Haru.prototype.resize = function () {
+    this.initGLMatrix();
 };
