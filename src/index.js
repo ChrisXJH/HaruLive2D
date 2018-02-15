@@ -1,11 +1,12 @@
 window.onload = function() {
 
     var haruConfig = {
-        "model" : "./assets/haru/haru_01.moc",
+        "model" : "./assets/haru/haru_02.moc",
+        "modelMode": "2",
         "textures" : [
-            "assets/haru/haru_01.1024/texture_00.png",
-            "assets/haru/haru_01.1024/texture_01.png",
-            "assets/haru/haru_01.1024/texture_02.png"
+            "assets/haru/haru_02.1024/texture_00.png",
+            "assets/haru/haru_02.1024/texture_01.png",
+            "assets/haru/haru_02.1024/texture_02.png"
         ]
     };
 
@@ -25,6 +26,8 @@ window.onload = function() {
     ];
 
     var canvas = document.getElementById("haru");
+
+    canvas.height = window.innerHeight;
 
     var vocalAudio = document.getElementById("vocal");
 
@@ -46,12 +49,14 @@ window.onload = function() {
             haru.subscribe(musicPlayer);
             haru.enableLookAtMouse();
             haru.setMotion(motionMgr.getMotionById('smile'), true);
-            haru.setArmMode(0);
+            haru.setArmMode(1);
 
             canvas.addEventListener('click', function() {
                 haru.setMotion(motionMgr.getMotionById('sing'), true);
                 if (!musicPlayer.isPlaying()) {
-                    musicPlayer.play();
+                    musicPlayer.play(function () {
+                        haru.setMotion(motionMgr.getMotionById('smile'), true);
+                    });
                 }
                 else {
                     musicPlayer.stop();

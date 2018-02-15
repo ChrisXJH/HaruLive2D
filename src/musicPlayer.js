@@ -9,7 +9,7 @@ function MusicPlayer() {
     this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
     this.analyser = this.audioCtx.createAnalyser();
-    
+
     this.oscillator = this.audioCtx.createOscillator();
 
     this.vocalSource = null;
@@ -17,6 +17,8 @@ function MusicPlayer() {
     this.NOTIFY_INTERVAL = 10;
 
     this.playing = false;
+
+    this.end_callback = null;
 
 }
 
@@ -61,10 +63,16 @@ MusicPlayer.prototype.initEventListeners = function() {
 
     this.songAudio.addEventListener('pause', function() {
         _this.playing = false;
+        if (_this.end_callback != null) {
+            _this.end_callback(_this);
+        }
     });
 
     this.songAudio.addEventListener('ended', function() {
         _this.playing = false;
+        if (_this.end_callback != null) {
+            _this.end_callback(_this);
+        }
     });
 };
 
@@ -89,9 +97,10 @@ MusicPlayer.prototype.addListener = function(listener) {
 
 };
 
-MusicPlayer.prototype.play = function() {
+MusicPlayer.prototype.play = function(callback) {
     this.vocalAudio.play();
     this.songAudio.play();
+    this.end_callback = callback;
 };
 
 MusicPlayer.prototype.pause = function() {
