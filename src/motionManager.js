@@ -7,13 +7,13 @@ function MotionManager(motionConfig, callback) {
     this.ready = false;
 
     this.currentMotion = 0;
-    
+
     this.loadMotions(callback);
 
 }
 
 function Motion(config) {
-    
+
     this.fps = config.fps;
 
     this.params = config.params;
@@ -25,14 +25,14 @@ function Motion(config) {
 
 MotionManager.prototype.loadMotions = function(callback) {
     var _this = this;
-    
+
     if (_this.motionConfig != null) {
         var loadCount = 0;
         for(var i = 0; i < _this.motionConfig.length; i++) {
             Utils.loadJSON(_this.motionConfig[i].path, function(res) {
                 if (res != null) {
                     _this.motionStack.push(res);
-                    
+
                     if (++loadCount == _this.motionConfig.length) {
                         _this.ready = true;
                         if (callback != null) callback();
@@ -44,7 +44,7 @@ MotionManager.prototype.loadMotions = function(callback) {
 };
 
 MotionManager.prototype.getMotion = function(index) {
-    
+
     if (index < 0 || index >= this.motionStack.length){
         return null;
     }
@@ -57,7 +57,7 @@ MotionManager.prototype.getMotionById = function(id) {
     var _this = this;
     for (var i = 0; i < _this.motionStack.length; i++) {
         if (_this.motionStack[i].id == id)
-            return _this.getMotion(i);
+        return _this.getMotion(i);
     }
 };
 
@@ -80,7 +80,7 @@ Motion.prototype.next = function() {
     for (var key in _this.params) {
         if (_this.params[key] != null && _this.params[key][_this.currentStepIndex] != null) {
             if (return_params == null)
-                return_params = {};
+            return_params = {};
             return_params[key] = _this.params[key][_this.currentStepIndex];
         }
     }
