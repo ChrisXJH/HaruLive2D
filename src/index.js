@@ -54,6 +54,7 @@ window.onload = function() {
             canvas.addEventListener('click', function() {
                 haru.setMotion(motionMgr.getMotionById('sing'), true);
                 if (!musicPlayer.isPlaying()) {
+                    haru.setArmMode(0);
                     musicPlayer.play(function () {
                         haru.setMotion(motionMgr.getMotionById('smile'), true);
                     });
