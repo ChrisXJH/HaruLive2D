@@ -1,5 +1,6 @@
 {
     "fps" : 30,
+    "id" : "smile",
     "params" : {
         
         "PARAM_BROW_L_ANGLE" : [0],

@@ -19,6 +19,10 @@ var motions = [
     {
         "id" : "unknown",
         "path" : "assets/haru/motions/idle_02.json"
+    },
+    {
+        "id" : "smile2",
+        "path" : "assets/haru/motions/idle_04.json"
     }
 ];
 
@@ -43,12 +47,15 @@ function initHaru() {
     haru = new Haru(haruConfig, canvas, function() {
         haru.subscribe(musicPlayer);
         haru.enableLookAtMouse();
-        haru.setMotion(motionMgr.next(), true);
+        haru.setMotion(motionMgr.getMotionById('smile'), true);
 
         canvas.addEventListener('click', function() {
             haru.setMotion(motionMgr.getMotionById('sing'), true);
             if (!musicPlayer.isPlaying()) {
                 musicPlayer.play();
+            }
+            else {
+                musicPlayer.stop();
             }
         });
         animate();

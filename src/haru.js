@@ -116,7 +116,7 @@ Haru.prototype.updateMotion = function() {
             this.currentMotion.motion.reset();
 
         for (var key in step) {
-            if (key == "PARAM_ANGLE_X" || key == "PARAM_ANGLE_Y") {
+            if (key == "PARAM_ANGLE_X" || key == "PARAM_ANGLE_Y" || key == "PARAM_EYE_BALL_X" || key == "PARAM_EYE_BALL_Y" || key == "PARAM_BODY_ANGLE_X") {
                 if (!_this.mouseOut)
                     continue;
             }
@@ -137,8 +137,10 @@ Haru.prototype.enableLookAtMouse = function() {
 
     _this.canvas.addEventListener('mousemove', function(e){
         clearTimeout(_this.mouseTimeout);
-        _this.mouse_x = e.clientX - _this.origin_x;
-        _this.mouse_y = e.clientY + _this.origin_y;
+        // _this.mouse_x = e.clientX - _this.origin_x;
+        // _this.mouse_y = e.clientY + _this.origin_y;
+        _this.mouse_x = e.clientX;
+        _this.mouse_y = e.clientY;
         _this.mouseOut = false;
         
         _this.updateFaceDirection();
@@ -165,10 +167,21 @@ Haru.prototype.resetMouse = function() {
 Haru.prototype.updateFaceDirection = function() {
     var _this = this;
     if (haru.completed) {
-        var angle_x = Math.atan(_this.mouse_x / _this.distance) * 180;
-        var angle_y = Math.atan(_this.mouse_y / _this.distance) * 180;
+        var midWidth = _this.canvas.width / 2;
+        var midHeight = _this.canvas.height / 2;
+        
+        var dragX = (_this.mouse_x - midWidth) / midWidth;
+        var dragY = (_this.mouse_y - midHeight + 100) / midHeight;
+        
+        // var angle_x = Math.atan(_this.mouse_x / _this.distance) * 180;
+        // var angle_y = Math.atan(_this.mouse_y / _this.distance) * 180;
+        var angle_x = dragX * 60;
+        var angle_y = dragY * 60;
         _this.live2DModel.setParamFloat("PARAM_ANGLE_X", angle_x);
         _this.live2DModel.setParamFloat("PARAM_ANGLE_Y", -angle_y);
+        _this.live2DModel.setParamFloat("PARAM_EYE_BALL_X", dragX / 2);
+        _this.live2DModel.setParamFloat("PARAM_EYE_BALL_Y", -dragY / 2);
+        _this.live2DModel.setParamFloat("PARAM_BODY_ANGLE_X", angle_x / 30);
     }
 };
 

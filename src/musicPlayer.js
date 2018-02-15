@@ -99,6 +99,13 @@ MusicPlayer.prototype.pause = function() {
     this.songAudio.pause();
 };
 
+MusicPlayer.prototype.stop = function() {
+    this.vocalAudio.pause();
+    this.songAudio.pause();
+    this.vocalAudio.currentTime = 0;
+    this.songAudio.currentTime = 0;
+};
+
 MusicPlayer.prototype.isPlaying = function() {
     return this.playing;
 };
