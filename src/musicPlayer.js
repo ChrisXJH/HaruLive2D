@@ -9,7 +9,7 @@ function MusicPlayer() {
     this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
     this.analyser = this.audioCtx.createAnalyser();
-
+    
     this.oscillator = this.audioCtx.createOscillator();
 
     this.vocalSource = null;
@@ -86,7 +86,7 @@ MusicPlayer.prototype.getWaveInfo = function(index) {
 MusicPlayer.prototype.addListener = function(listener) {
 
     this.listeners.push(listener);
-    
+
 };
 
 MusicPlayer.prototype.play = function() {

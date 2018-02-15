@@ -1,88 +1,83 @@
-var haruConfig = {
-    "model" : "./assets/haru/haru_01.moc",
-    "textures" : [
-        "assets/haru/haru_01.1024/texture_00.png",
-        "assets/haru/haru_01.1024/texture_01.png",
-        "assets/haru/haru_01.1024/texture_02.png"
-    ]
-};
+window.onload = function() {
 
-var motions = [
-    {
-        "id" : "sing",
-        "path" : "assets/haru/motions/idle_01.json"
-    },
-    {
-        "id" : "smile",
-        "path" : "assets/haru/motions/idle_00.json"
-    },
-    {
-        "id" : "unknown",
-        "path" : "assets/haru/motions/idle_02.json"
-    }
-];
+    var haruConfig = {
+        "model" : "./assets/haru/haru_01.moc",
+        "textures" : [
+            "assets/haru/haru_01.1024/texture_00.png",
+            "assets/haru/haru_01.1024/texture_01.png",
+            "assets/haru/haru_01.1024/texture_02.png"
+        ]
+    };
 
-var canvas = document.getElementById("haru");
+    var motions = [
+        {
+            "id" : "sing",
+            "path" : "assets/haru/motions/idle_01.json"
+        },
+        {
+            "id" : "smile",
+            "path" : "assets/haru/motions/idle_00.json"
+        },
+        {
+            "id" : "unknown",
+            "path" : "assets/haru/motions/idle_02.json"
+        }
+    ];
 
-var vocalAudio = document.getElementById("vocal");
+    var canvas = document.getElementById("haru");
 
-var song = document.getElementById("song");
+    var vocalAudio = document.getElementById("vocal");
 
-var haru = null;
+    var song = document.getElementById("song");
 
-var musicPlayer = new MusicPlayer();
+    var haru = null;
 
-musicPlayer.setVocal(vocalAudio);
+    var musicPlayer = new MusicPlayer();
 
-musicPlayer.setSong(song);
+    musicPlayer.setVocal(vocalAudio);
 
-musicPlayer.init();
+    musicPlayer.setSong(song);
 
-function initHaru() {
-    
-    haru = new Haru(haruConfig, canvas, function() {
-        haru.subscribe(musicPlayer);
-        haru.enableLookAtMouse();
-        haru.setMotion(motionMgr.getMotionById('smile'), true);
+    musicPlayer.init();
 
-        canvas.addEventListener('click', function() {
-            haru.setMotion(motionMgr.getMotionById('sing'), true);
-            if (!musicPlayer.isPlaying()) {
-                musicPlayer.play();
-            }
-            else {
-                musicPlayer.stop();
-            }
+    function initHaru() {
+
+        haru = new Haru(haruConfig, canvas, function() {
+            haru.subscribe(musicPlayer);
+            haru.enableLookAtMouse();
+            haru.setMotion(motionMgr.getMotionById('smile'), true);
+            haru.setArmMode(0);
+
+            canvas.addEventListener('click', function() {
+                haru.setMotion(motionMgr.getMotionById('sing'), true);
+                if (!musicPlayer.isPlaying()) {
+                    musicPlayer.play();
+                }
+                else {
+                    musicPlayer.stop();
+                }
+            });
+            animate();
         });
-        animate();
-    });
-}
-
-
-
-
-
-
-var motionMgr = new MotionManager(motions, initHaru);
-
-
-
-
-function animate(seconds) {
-    
-    if (haru != null && haru.completed) {
-        haru.setArmMode(0);
-        haru.update(seconds);
-        haru.draw();
     }
 
-    var requestAnimationFrame = 
-        window.requestAnimationFrame || 
+    var motionMgr = new MotionManager(motions, initHaru);
+
+    function animate(seconds) {
+
+        if (haru != null && haru.completed) {
+            haru.update(seconds);
+            haru.draw();
+        }
+
+        var requestAnimationFrame =
+        window.requestAnimationFrame ||
         window.mozRequestAnimationFrame ||
-        window.webkitRequestAnimationFrame || 
+        window.webkitRequestAnimationFrame ||
         window.msRequestAnimationFrame;
 
-    requestAnimationFrame(animate);
+        requestAnimationFrame(animate);
 
-}
+    }
 
+};

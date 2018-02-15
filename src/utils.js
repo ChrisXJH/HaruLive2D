@@ -40,11 +40,11 @@ Utils.loadBytes = function(path, callback) {
     request.responseType = "arraybuffer";
     request.onload = function(){
         switch( request.status ){
-        case 200:
+            case 200:
             if (callback != null)
-                callback( request.response );
+            callback( request.response );
             break;
-        default:
+            default:
             console.error( "Failed to load (" + request.status + ") : " + path );
             break;
         }
