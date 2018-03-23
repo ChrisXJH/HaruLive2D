@@ -31,40 +31,53 @@ window.onload = function() {
 
 
 
-    var vocalAudio = document.getElementById("vocal");
+    // var vocalAudio = document.getElementById("vocal");
 
-    var song = document.getElementById("song");
+    // var song = document.getElementById("song");
 
     var haru = null;
 
-    var musicPlayer = new MusicPlayer();
+    // var musicPlayer = new MusicPlayer();
 
-    musicPlayer.setVocal(vocalAudio);
+    // musicPlayer.setVocal(vocalAudio);
 
-    musicPlayer.setSong(song);
+    // musicPlayer.setSong(song);
 
-    musicPlayer.init();
+    // musicPlayer.init();
+
+    var smile = true;
 
     function initHaru() {
 
         haru = new Haru(haruConfig, canvas, function() {
-            haru.subscribe(musicPlayer);
+            // haru.subscribe(musicPlayer);
             haru.enableLookAtMouse();
             haru.setMotion(motionMgr.getMotionById('smile'), true);
             haru.setArmMode(1);
 
             canvas.addEventListener('click', function() {
-                haru.setMotion(motionMgr.getMotionById('sing'), true);
-                if (!musicPlayer.isPlaying()) {
-                    haru.setArmMode(0);
-                    musicPlayer.play(function () {
-                        haru.setMotion(motionMgr.getMotionById('smile'), true);
-                        haru.setArmMode(1);
-                    });
+                if (smile) {
+                    haru.setMotion(motionMgr.getMotionById('sing'), true);
+                    haru.setArmMode(1);
+
+                    smile = false;
                 }
                 else {
-                    musicPlayer.stop();
+                    haru.setMotion(motionMgr.getMotionById('smile'), true);
+                    haru.setArmMode(0);
+
+                    smile = true;
                 }
+                // if (!musicPlayer.isPlaying()) {
+                //     haru.setArmMode(0);
+                //     musicPlayer.play(function () {
+                //         haru.setMotion(motionMgr.getMotionById('smile'), true);
+                //         haru.setArmMode(1);
+                //     });
+                // }
+                // else {
+                //     musicPlayer.stop();
+                // }
             });
             animate();
         });
