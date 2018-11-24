@@ -1,93 +1,49 @@
-function MotionManager(motionConfig, callback) {
-
-    this.motionConfig = motionConfig;
-
-    this.motionStack = [];
-
-    this.ready = false;
-
-    this.currentMotion = 0;
-
-    this.loadMotions(callback);
-
+function MotionManager(motionConfig) {
+  this.motionConfig = motionConfig;
+  this.motionStack = [];
+  this.currentMotion = 0;
 }
 
 function Motion(config) {
-
-    this.fps = config.fps;
-
-    this.params = config.params;
-
-    this.currentStepIndex = 0;
-
+  this.id = config.id;
+  this.fps = config.fps;
+  this.params = config.params;
+  this.currentStepIndex = 0;
 }
 
-
-MotionManager.prototype.loadMotions = function(callback) {
-    var _this = this;
-
-    if (_this.motionConfig != null) {
-        var loadCount = 0;
-        for(var i = 0; i < _this.motionConfig.length; i++) {
-            Utils.loadJSON(_this.motionConfig[i].path, function(res) {
-                if (res != null) {
-                    _this.motionStack.push(res);
-
-                    if (++loadCount == _this.motionConfig.length) {
-                        _this.ready = true;
-                        if (callback != null) callback();
-                    }
-                }
-            });
-        }
-    }
-};
-
-MotionManager.prototype.getMotion = function(index) {
-
-    if (index < 0 || index >= this.motionStack.length){
-        return null;
-    }
-    else {
-        return new Motion(this.motionStack[index]);
-    }
+MotionManager.prototype.init = function() {
+  return Promise.all(
+    this.motionConfig.map(config =>
+      Utils.loadJSON(config.path).then(res =>
+        this.motionStack.push(new Motion(res))
+      )
+    )
+  );
 };
 
 MotionManager.prototype.getMotionById = function(id) {
-    var _this = this;
-    for (var i = 0; i < _this.motionStack.length; i++) {
-        if (_this.motionStack[i].id == id)
-        return _this.getMotion(i);
-    }
-};
-
-MotionManager.prototype.isReady = function() {
-    return this.ready;
+  return this.motionStack.filter(motion => motion.id === id)[0];
 };
 
 MotionManager.prototype.next = function() {
-    var rtn = this.getMotion(++this.currentMotion);
-    if (rtn == null) {
-        this.currentMotion = 0;
-        rtn = this.getMotion(this.currentMotion);
-    }
-    return rtn;
+  ++this.currentMotion;
+  if (this.currentMotion >= this.motionStack.length) {
+    this.currentMotion = 0;
+  }
+  return this.motionStack[this.currentMotion];
 };
 
 Motion.prototype.next = function() {
-    var _this = this;
-    var return_params = null;
-    for (var key in _this.params) {
-        if (_this.params[key] != null && _this.params[key][_this.currentStepIndex] != null) {
-            if (return_params == null)
-            return_params = {};
-            return_params[key] = _this.params[key][_this.currentStepIndex];
-        }
+  var return_params = {};
+  for (var key in this.params) {
+    if (this.params[key] && this.params[key][this.currentStepIndex]) {
+      return_params[key] = this.params[key][this.currentStepIndex];
     }
-    ++_this.currentStepIndex;
-    return return_params;
+  }
+  ++this.currentStepIndex;
+  return return_params;
 };
 
 Motion.prototype.reset = function() {
-    this.currentStepIndex = 0;
+  this.currentStepIndex = 0;
 };

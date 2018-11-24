@@ -1,54 +1,40 @@
-
 function Utils() {}
 
-Utils.loadJSON = function(url, callback) {
+Utils.httpGet = function(url, responseType) {
+  return new Promise((resolve, reject) => {
     var req = new XMLHttpRequest();
-    req.responseType = 'json';
+    req.responseType = responseType;
     req.onreadystatechange = function() {
-        switch(req.status) {
-            case 200 : {
-                if (callback != null) callback(req.response);
-                break;
-            }
-        }
+      if (req.status && (req.status < 200 || req.status >= 300)) {
+        reject("Failed to GET from: " + url);
+      } else if (req.readyState == 4) {
+        resolve(req.response);
+      }
     };
-    req.open('GET', url, true);
+    req.open("GET", url, true);
     req.send();
-}
-
-Utils.getWebGLContext = function(canvas) {
-    var NAMES = [ "webgl" , "experimental-webgl" , "webkit-3d" , "moz-webgl"];
-
-    var param = {
-        alpha : true,
-        premultipliedAlpha : true
-    };
-
-    for (var i = 0; i < NAMES.length; i++ ){
-        try{
-            var ctx = canvas.getContext( NAMES[i], param );
-            if( ctx ) return ctx;
-        }
-        catch(e){}
-    }
-    return null;
+  });
 };
 
-Utils.loadBytes = function(path, callback) {
-    var request = new XMLHttpRequest();
-    request.open("GET", path , true);
-    request.responseType = "arraybuffer";
-    request.onload = function(){
-        switch( request.status ){
-            case 200:
-            if (callback != null)
-            callback( request.response );
-            break;
-            default:
-            console.error( "Failed to load (" + request.status + ") : " + path );
-            break;
-        }
-    }
+Utils.loadJSON = function(url) {
+  return this.httpGet(url, "json");
+};
 
-    request.send(null);
-}
+Utils.getWebGLContext = function(canvas) {
+  var NAMES = ["webgl", "experimental-webgl", "webkit-3d", "moz-webgl"];
+  var param = {
+    alpha: true,
+    premultipliedAlpha: true
+  };
+  for (var i = 0; i < NAMES.length; i++) {
+    try {
+      var ctx = canvas.getContext(NAMES[i], param);
+      if (ctx) return ctx;
+    } catch (e) {}
+  }
+  return null;
+};
+
+Utils.loadBytes = function(url) {
+  return this.httpGet(url, "arraybuffer");
+};
