@@ -23,10 +23,9 @@ function Haru(config, canvas) {
   this.canvasOriginalHeight = this.canvas.height;
 }
 
-Haru.prototype.init = function(callback) {
+Haru.prototype.init = function() {
   Live2D.init();
   this.initWebGL();
-
   return this.initModel()
     .then(() => this.initTextures())
     .then(() => this.initGLMatrix());
@@ -36,11 +35,10 @@ Haru.prototype.initWebGL = function() {
   let gl = Utils.getWebGLContext(this.canvas);
   if (!gl) {
     console.error("Failed to create WebGL context.");
-    return;
+  } else {
+    Live2D.setGL(gl);
+    this.gl = gl;
   }
-
-  Live2D.setGL(gl);
-  this.gl = gl;
 };
 
 Haru.prototype.update = function(seconds) {
@@ -69,16 +67,17 @@ Haru.prototype.updateMotion = function() {
 
     for (let key in step) {
       if (
-        !this.mouseOut &&
-        (key == "PARAM_ANGLE_X" ||
+        this.mouseOut ||
+        !(
+          key == "PARAM_ANGLE_X" ||
           key == "PARAM_ANGLE_Y" ||
           key == "PARAM_EYE_BALL_X" ||
           key == "PARAM_EYE_BALL_Y" ||
-          key == "PARAM_BODY_ANGLE_X")
+          key == "PARAM_BODY_ANGLE_X"
+        )
       ) {
-        continue;
+        this.setParam(key, step[key]);
       }
-      this.setParam(key, step[key]);
     }
   }
 };
@@ -90,8 +89,6 @@ Haru.prototype.updateMouth = function(mag) {
 Haru.prototype.enableLookAtMouse = function() {
   this.canvas.addEventListener("mousemove", e => {
     clearTimeout(this.mouseTimeout);
-    // this.mouse_x = e.clientX - this.origin_x;
-    // this.mouse_y = e.clientY + this.origin_y;
     this.mouse_x = e.clientX;
     this.mouse_y = e.clientY;
     this.mouseOut = false;
@@ -119,8 +116,6 @@ Haru.prototype.updateFaceDirection = function() {
   let midHeight = this.canvas.height / 2;
   let dragX = (this.mouse_x - midWidth) / midWidth;
   let dragY = (this.mouse_y - midHeight + this.canvas.height / 5) / midHeight;
-  // let angle_x = Math.atan(this.mouse_x / this.distance) * 180;
-  // let angle_y = Math.atan(this.mouse_y / this.distance) * 180;
   let angle_x = dragX * 60;
   let angle_y = dragY * 60;
   this.live2DModel.setParamFloat("PARAM_ANGLE_X", angle_x);
@@ -224,7 +219,7 @@ Haru.prototype.createTexture = function(image) {
   let texture = gl.createTexture();
   if (!texture) {
     console.error("Failed to generate gl texture name.");
-    return -1;
+    return null;
   }
 
   if (this.live2DModel.isPremultipliedAlpha() == false) {
@@ -259,7 +254,6 @@ Haru.prototype.notify = function(whoFrom) {
   if (this.lipValues.length >= 3) {
     lipValue = 0;
     this.lipValues = this.lipValues.slice(1);
-
     for (let i = 0; i < this.lipValues.length; i++) {
       lipValue += this.lipValues[i];
     }
