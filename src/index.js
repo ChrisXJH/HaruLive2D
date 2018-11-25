@@ -11,15 +11,15 @@ window.onload = function() {
 
   var motions = [
     {
-      id: "sing",
+      id: "idle_01",
       path: "assets/haru/motions/idle_01.json"
     },
     {
-      id: "smile",
+      id: "idle_00",
       path: "assets/haru/motions/idle_00.json"
     },
     {
-      id: "unknown",
+      id: "idle_02",
       path: "assets/haru/motions/idle_02.json"
     }
   ];
@@ -58,7 +58,7 @@ window.onload = function() {
   motionMgr
     .init()
     .then(initHaru)
-    .then(() => setInterval(() => motionMgr.next(), 5000));
+    .then(() => setInterval(() => motionMgr.next(), 15000));
 
   function animate() {
     if (haru != null) {
@@ -71,7 +71,8 @@ window.onload = function() {
       window.mozRequestAnimationFrame ||
       window.webkitRequestAnimationFrame ||
       window.msRequestAnimationFrame;
-
-    requestAnimationFrame(animate);
+    setTimeout(() => {
+      requestAnimationFrame(animate);
+    }, 1000 / 54);
   }
 };
