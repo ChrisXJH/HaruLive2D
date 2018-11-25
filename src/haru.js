@@ -1,4 +1,4 @@
-function Haru(config, canvas) {
+function Haru(config, canvas, motionManager) {
   this.config = config;
   this.live2DModel = null;
   this.modelMode = config.modelMode != null ? config.modelMode : 1;
@@ -8,10 +8,7 @@ function Haru(config, canvas) {
   this.origin_x = 0;
   this.origin_y = 0;
   this.armMode = 0;
-  this.currentMotion = {
-    motion: null,
-    repeat: false
-  };
+  this.currentMotion = null;
   this.MOUSE_TIME_OUT = 5000;
   this.mouseTimeout = null;
   this.mouse_x = 0;
@@ -21,6 +18,7 @@ function Haru(config, canvas) {
   this.lipValues = [];
   this.lipValDivisor = 100;
   this.canvasOriginalHeight = this.canvas.height;
+  this.motionManager = motionManager;
 }
 
 Haru.prototype.init = function() {
@@ -61,23 +59,22 @@ Haru.prototype.draw = function() {
 };
 
 Haru.prototype.updateMotion = function() {
-  if (this.currentMotion && this.currentMotion.motion) {
-    let step = this.currentMotion.motion.next();
-    if (!step && this.currentMotion.repeat) this.currentMotion.motion.reset();
+  this.currentMotion = this.motionManager.getCurrentMotion();
+  let step = this.currentMotion.next();
+  if (!step) this.currentMotion.reset();
 
-    for (let key in step) {
-      if (
-        this.mouseOut ||
-        !(
-          key == "PARAM_ANGLE_X" ||
-          key == "PARAM_ANGLE_Y" ||
-          key == "PARAM_EYE_BALL_X" ||
-          key == "PARAM_EYE_BALL_Y" ||
-          key == "PARAM_BODY_ANGLE_X"
-        )
-      ) {
-        this.setParam(key, step[key]);
-      }
+  for (let key in step) {
+    if (
+      this.mouseOut ||
+      !(
+        key == "PARAM_ANGLE_X" ||
+        key == "PARAM_ANGLE_Y" ||
+        key == "PARAM_EYE_BALL_X" ||
+        key == "PARAM_EYE_BALL_Y" ||
+        key == "PARAM_BODY_ANGLE_X"
+      )
+    ) {
+      this.setParam(key, step[key]);
     }
   }
 };
@@ -139,11 +136,12 @@ Haru.prototype.setArmMode = function(mode) {
   }
 };
 
-Haru.prototype.setMotion = function(motion, repeat) {
-  this.currentMotion = {
-    motion: motion,
-    repeat: repeat
-  };
+Haru.prototype.setCurrentMotion = function(motion) {
+  this.currentMotion = motion;
+};
+
+Haru.prototype.setMotionManager = function(motionManager) {
+  this.motionManager = motionManager;
 };
 
 Haru.prototype.initModel = function() {

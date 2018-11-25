@@ -26,27 +26,17 @@ window.onload = function() {
 
   var canvas = document.getElementById("haru");
   var haru = null;
-  var smile = true;
+  let armMode = 0;
+  var motionMgr = new MotionManager(motions);
 
   function initHaru() {
-    haru = new Haru(haruConfig, canvas);
+    haru = new Haru(haruConfig, canvas, motionMgr);
     haru.init().then(() => {
       haru.enableLookAtMouse();
-      haru.setMotion(motionMgr.getMotionById("smile"), true);
-      haru.setArmMode(1);
-
+      haru.setArmMode(armMode);
       canvas.addEventListener("click", function() {
-        if (smile) {
-          haru.setMotion(motionMgr.getMotionById("sing"), true);
-          haru.setArmMode(1);
-
-          smile = false;
-        } else {
-          haru.setMotion(motionMgr.getMotionById("smile"), true);
-          haru.setArmMode(0);
-
-          smile = true;
-        }
+        haru.setArmMode(armMode % 2 === 0);
+        armMode++;
       });
       animate();
     });
@@ -65,8 +55,10 @@ window.onload = function() {
 
   resize();
 
-  var motionMgr = new MotionManager(motions);
-  motionMgr.init().then(initHaru);
+  motionMgr
+    .init()
+    .then(initHaru)
+    .then(() => setInterval(() => motionMgr.next(), 5000));
 
   function animate() {
     if (haru != null) {

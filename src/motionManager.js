@@ -1,7 +1,7 @@
 function MotionManager(motionConfig) {
   this.motionConfig = motionConfig;
   this.motionStack = [];
-  this.currentMotion = 0;
+  this.currentMotionIndex = 0;
 }
 
 function Motion(config) {
@@ -26,11 +26,15 @@ MotionManager.prototype.getMotionById = function(id) {
 };
 
 MotionManager.prototype.next = function() {
-  ++this.currentMotion;
-  if (this.currentMotion >= this.motionStack.length) {
-    this.currentMotion = 0;
+  ++this.currentMotionIndex;
+  if (this.currentMotionIndex >= this.motionStack.length) {
+    this.currentMotionIndex = 0;
   }
-  return this.motionStack[this.currentMotion];
+  return this.motionStack[this.currentMotionIndex];
+};
+
+MotionManager.prototype.getCurrentMotion = function() {
+  return this.motionStack[this.currentMotionIndex];
 };
 
 Motion.prototype.next = function() {
