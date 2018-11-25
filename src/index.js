@@ -68,9 +68,9 @@ window.onload = function() {
   var motionMgr = new MotionManager(motions);
   motionMgr.init().then(initHaru);
 
-  function animate(seconds) {
+  function animate() {
     if (haru != null) {
-      haru.update(seconds);
+      haru.update();
       haru.draw();
     }
 

@@ -34,9 +34,10 @@ MotionManager.prototype.next = function() {
 };
 
 Motion.prototype.next = function() {
-  var return_params = {};
+  var return_params = null;
   for (var key in this.params) {
     if (this.params[key] && this.params[key][this.currentStepIndex]) {
+      if (return_params == null) return_params = {};
       return_params[key] = this.params[key][this.currentStepIndex];
     }
   }

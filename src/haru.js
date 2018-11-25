@@ -41,7 +41,7 @@ Haru.prototype.initWebGL = function() {
   }
 };
 
-Haru.prototype.update = function(seconds) {
+Haru.prototype.update = function() {
   this.updateMotion();
 };
 
